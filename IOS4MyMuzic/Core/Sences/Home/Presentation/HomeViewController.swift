@@ -8,7 +8,8 @@
 import UIKit
 
 class HomeViewController: UIViewController {
-    private let viewModel = HomeViewModel()
+   
+    private lazy var viewModel: HomeViewModel = HomeViewModel()
     
     let trendingLabel = UILabel()
     let adsView = UIView()
@@ -19,7 +20,7 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         viewModel.delegate = self
-        viewModel.loadData()
+        viewModel.loadMockData()
     }
     
     private func setupUI() {
@@ -30,7 +31,6 @@ class HomeViewController: UIViewController {
     }
     private func configUI() {
     
-        
         tableView.register(MusicSectionTableViewCell.self, forCellReuseIdentifier: MusicSectionTableViewCell.identifier)
         tableView.dataSource = self
         tableView.delegate = self
@@ -75,10 +75,9 @@ class HomeViewController: UIViewController {
             adsView.heightAnchor.constraint(equalToConstant: 41),
             
             tableView.topAnchor.constraint(equalTo: adsView.bottomAnchor, constant: 10),
-            tableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            tableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
+            tableView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: 12),
             tableView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-            
             
         ])
     }
@@ -97,14 +96,17 @@ extension HomeViewController : UITableViewDataSource, UITableViewDelegate {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: MusicSectionTableViewCell.identifier, for: indexPath) as? MusicSectionTableViewCell else {
             return UITableViewCell()
         }
+    
         guard let section = viewModel.trendingSections?[indexPath.row] else { return UITableViewCell() }
-        cell.configure(title: section.title , data: section.items)
+        
+        cell.configure(title: section.title , data: section.items, isFirstSession: indexPath.row == 0)
         return cell
     }
 
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 230
+        
+        return indexPath.row == 0 ? 100 : 230
     }
     
 }
