@@ -62,6 +62,14 @@ class MainTabbarController: UITabBarController, UITabBarControllerDelegate {
     }
     
     private func setUpTabBarAppearance() {
+//        let appearance = UITabBarAppearance()
+//        appearance.configureWithOpaqueBackground()
+//        appearance.backgroundColor = .clear
+//        appearance.backgroundImage = UIImage(named: "img_tabbar")
+//        
+//        tabBar.standardAppearance = appearance
+//        tabBar.scrollEdgeAppearance = appearance
+
 
         let cornerRadius: CGFloat = 30
         let bgHeight: CGFloat = 80
@@ -90,4 +98,8 @@ class MainTabbarController: UITabBarController, UITabBarControllerDelegate {
         tabBar.backgroundColor = .clear
         tabBar.isTranslucent = true
     }
+
+    @IBAction func goToProfileButtonTapped(_ sender: Any) {
+        self.selectedIndex = 3
+       }
 }

@@ -17,7 +17,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let homeVC = MainTabbarController()
         self.window?.rootViewController = homeVC
         self.window?.makeKeyAndVisible()
-        
+        //let HomeViewController = MainTabbarController()
+        let tabBarVC = MainTabbarController()
+        self.window?.rootViewController = tabBarVC
+        self.window?.makeKeyAndVisible()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            let purchaseVC = SaleViewController()
+            purchaseVC.modalPresentationStyle = .overFullScreen
+            tabBarVC.present(purchaseVC, animated: true, completion: nil)
+        }
         return true
     }
 
