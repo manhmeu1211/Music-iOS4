@@ -11,7 +11,11 @@ class SearchViewController: UIViewController {
     private let mainStackView = UIStackView()
     private let titleLabel = UILabel()
     private let searchBarView = SearchBar()
+    private let headerLabel = UILabel()
+    private let headerClearAllButton = UIButton()
+    private let headerStack = UIStackView()
     private let recentTableView = UITableView()
+    private let resultTableView = UITableView()
 
     private var recentSearches = [
         "Ariana Grande",
@@ -21,6 +25,32 @@ class SearchViewController: UIViewController {
         "Happy new year best music for eve night...",
         "Morgan Wallen",
     ]
+
+    private var searchResults: [SearchResultType] = [
+        .playlist(
+            name: "Playlist1",
+            artist: "Morgan Wallen",
+            image: "img_thumbnal_song",
+            numberOfTrack: 15
+        ),
+        .song(
+            name: "ABC",
+            artist: "Drake",
+            image: "img_thumbnal_song",
+            duration: "4:20",
+            totalPlay: "1M"
+        ),
+        .artist(
+            name: "Morgan Wallen",
+            followers: 1_500_000,
+            image: "img_thumbnal_song"
+        ),
+    ]
+
+    private var searchKeyword: String = ""
+    private var isSearching: Bool {
+        !searchKeyword.isEmpty
+    }
 
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?)
     {
@@ -34,6 +64,8 @@ class SearchViewController: UIViewController {
     }
 
     override func viewDidLoad() {
+        updateTableViewVisibility()
+        
         if let tabBarHeight = self.tabBarController?.tabBar.frame.height {
             recentTableView.contentInset = UIEdgeInsets(
                 top: 0,
@@ -42,6 +74,14 @@ class SearchViewController: UIViewController {
                 right: 0
             )
             recentTableView.scrollIndicatorInsets = recentTableView.contentInset
+
+            resultTableView.contentInset = UIEdgeInsets(
+                top: 0,
+                left: 0,
+                bottom: tabBarHeight,
+                right: 0
+            )
+            resultTableView.scrollIndicatorInsets = resultTableView.contentInset
         }
     }
 
@@ -68,15 +108,37 @@ class SearchViewController: UIViewController {
 
         recentTableView.backgroundColor = .clear
         recentTableView.separatorStyle = .none
-        recentTableView.backgroundColor = .clear
         recentTableView.showsVerticalScrollIndicator = false
         recentTableView.dataSource = self
         recentTableView.delegate = self
-        recentTableView.register(
-            RecentSearchCell.self,
-            forCellReuseIdentifier: "RecentSearchCell"
-        )
+        recentTableView.register(type: RecentSearchCell.self)
         recentTableView.translatesAutoresizingMaskIntoConstraints = false
+
+        resultTableView.backgroundColor = .clear
+        resultTableView.separatorStyle = .none
+        resultTableView.showsVerticalScrollIndicator = false
+        resultTableView.dataSource = self
+        resultTableView.delegate = self
+        resultTableView.register(type: SearchResultCell.self)
+        resultTableView.translatesAutoresizingMaskIntoConstraints = false
+
+        searchBarView.delegate = self
+
+        headerLabel.text = "Recent Search"
+        headerLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        headerLabel.textColor = .white
+
+        headerClearAllButton.setTitle("Clear All", for: .normal)
+        headerClearAllButton.setTitleColor(UIColor.systemPurple, for: .normal)
+        headerClearAllButton.titleLabel?.font = UIFont.boldSystemFont(
+            ofSize: 18
+        )
+        headerClearAllButton.isHidden = isSearching
+
+        headerStack.axis = .horizontal
+        headerStack.alignment = .center
+        headerStack.spacing = 8
+        headerStack.translatesAutoresizingMaskIntoConstraints = false
     }
 
     private func addContentViews() {
@@ -87,8 +149,12 @@ class SearchViewController: UIViewController {
         mainStackView.addArrangedSubview(spacingView(height: 12))
         mainStackView.addArrangedSubview(searchBarView)
         mainStackView.addArrangedSubview(spacingView(height: 30))
-        mainStackView.addArrangedSubview(headerStack())
+        mainStackView.addArrangedSubview(headerStack)
         mainStackView.addArrangedSubview(recentTableView)
+        mainStackView.addArrangedSubview(resultTableView)
+
+        headerStack.addArrangedSubview(headerLabel)
+        headerStack.addArrangedSubview(headerClearAllButton)
     }
 
     private func addLayoutConstraints() {
@@ -119,23 +185,29 @@ class SearchViewController: UIViewController {
         return v
     }
 
-    private func headerStack() -> UIStackView {
-        let label = UILabel()
-        label.text = "Recent Searches"
-        label.font = UIFont.boldSystemFont(ofSize: 18)
-        label.textColor = .white
+    private func updateTableViewVisibility() {
+        recentTableView.isHidden = isSearching
+        resultTableView.isHidden = !isSearching
+        headerStack.isHidden = isSearching
+    }
 
-        let button = UIButton(type: .system)
-        button.setTitle("Clear All", for: .normal)
-        button.setTitleColor(UIColor.systemPurple, for: .normal)
-        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+    private func handleSearch(query: String) {
+        searchKeyword = query
+        updateTableViewVisibility()
+    }
 
-        let stack = UIStackView(arrangedSubviews: [label, UIView(), button])
-        stack.axis = .horizontal
-        stack.alignment = .center
-        stack.spacing = 8
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
+    private func getTypeCellFromResultType(_ resultType: SearchResultType) {
+
+    }
+}
+
+extension SearchViewController: SearchBarDelegate {
+    func searchBar(_ searchBar: SearchBar, textDidChange text: String) {
+        handleSearch(query: text)
+    }
+
+    func searchBarCancelButtonClicked(_ searchBar: SearchBar) {
+        handleSearch(query: "")
     }
 }
 
@@ -143,23 +215,41 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int)
         -> Int
     {
-        return recentSearches.count
+        if tableView == recentTableView {
+            return recentSearches.count
+        }
+        return searchResults.count
     }
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
         -> UITableViewCell
     {
-        guard
-            let cell = tableView.dequeueReusableCell(
-                withIdentifier: "RecentSearchCell",
-                for: indexPath
-            )
-                as? RecentSearchCell
-        else {
-            return UITableViewCell()
+        if tableView == recentTableView {
+            guard
+                let cell = tableView.dequeueCell(
+                    type: RecentSearchCell.self,
+                    indexPath: indexPath
+                )
+            else {
+                return UITableViewCell()
+            }
+            cell.configure(with: recentSearches[indexPath.row])
+            return cell
+        } else {
+            guard
+                let cell = tableView.dequeueCell(
+                    type: SearchResultCell.self,
+                    indexPath: indexPath
+                )
+            else {
+                return UITableViewCell()
+            }
+
+            cell.configure(with: searchResults[indexPath.row])
+            return cell
         }
-        cell.configure(with: recentSearches[indexPath.row])
-        return cell
     }
+
     func tableView(
         _ tableView: UITableView,
         didSelectRowAt indexPath: IndexPath
@@ -167,6 +257,24 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         // Handle search selection
     }
+}
+
+// MARK: - Search Result Types
+enum SearchResultType {
+    case song(
+        name: String,
+        artist: String,
+        image: String,
+        duration: String,
+        totalPlay: String
+    )
+    case playlist(
+        name: String,
+        artist: String,
+        image: String,
+        numberOfTrack: Int
+    )
+    case artist(name: String, followers: Int, image: String)
 }
 
 #if DEBUG
