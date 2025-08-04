@@ -12,7 +12,11 @@ extension APIOperation where Self : APIRequest {
     func execute(completion: @escaping (Result<Model, Error>) -> Void) {
         self.printRequest()
         
-        let session = URLSession(configuration: .default)
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 30
+        
+        let session = URLSession(configuration: configuration)
         let task = session.dataTask(with: self.request) { data, response, error in
             if let error = error {
                 DispatchQueue.main.async {
