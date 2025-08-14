@@ -80,12 +80,4 @@ class RecentSearchCell: UITableViewCell {
     func configure(with text: String) {
         label.text = text
     }
-}
-
-#if DEBUG
-    #Preview(traits: .sizeThatFitsLayout) {
-        let cell = RecentSearchCell()
-        cell.configure(with: "123")
-        return cell
-    }
-#endif
+} 
