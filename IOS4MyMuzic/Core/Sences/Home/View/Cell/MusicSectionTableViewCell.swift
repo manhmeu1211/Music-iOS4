@@ -31,7 +31,7 @@ class MusicSectionTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(title: String, data: [Playlist], isFirstSession: Bool) {
+    func configure(title: String, data: [PlaylistModel], isFirstSession: Bool) {
         sectionView.configure(with: title, dataSource: data, isFirstSession: isFirstSession)
     }
 }

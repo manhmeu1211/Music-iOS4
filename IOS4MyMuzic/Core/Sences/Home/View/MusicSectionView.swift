@@ -9,7 +9,7 @@ import UIKit
 
 class MusicSectionView: UIView {
     let titleLabel: UILabel = UILabel()
-    var dataSource: [Playlist] = []
+    var dataSource: [PlaylistModel] = []
     var collectionView: UICollectionView!
     var isFirstSession: Bool = false
     override init(frame: CGRect) {
@@ -47,7 +47,7 @@ class MusicSectionView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    func configure(with title: String, dataSource: [Playlist], isFirstSession: Bool) {
+    func configure(with title: String, dataSource: [PlaylistModel], isFirstSession: Bool) {
         titleLabel.text = title
         self.dataSource = dataSource
         self.isFirstSession = isFirstSession

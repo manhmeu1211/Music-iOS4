@@ -6,10 +6,12 @@
 //
 
 import UIKit
+import Combine
 
 class HomeViewController: UIViewController {
-    private lazy var viewModel: HomeViewModel = HomeViewModel()
     
+    private lazy var viewModel: HomeViewModel = HomeViewModel()
+    private var cancellables = Set<AnyCancellable>()
     let trendingLabel = UILabel()
     let adsView = UIView()
     let containerView = UIView()
@@ -18,10 +20,9 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        viewModel.delegate = self
-        viewModel.loadMockData()
+        viewModel.fetchData()
+        bindViewModel()
     }
-    
     private func setupUI() {
         configUI()
         setUpContent()
@@ -85,6 +86,8 @@ class HomeViewController: UIViewController {
     }
     
 }
+
+//MARK: setup tableview
 extension HomeViewController : UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let sections  = viewModel.trendingSections else { return 0}
@@ -98,7 +101,7 @@ extension HomeViewController : UITableViewDataSource, UITableViewDelegate {
     
         guard let section = viewModel.trendingSections?[indexPath.row] else { return UITableViewCell() }
         
-        cell.configure(title: section.title , data: section.items, isFirstSession: indexPath.row == 0)
+        cell.configure(title: section.title , data: section.items.collection, isFirstSession: indexPath.row == 0)
         return cell
     }
 
@@ -109,18 +112,8 @@ extension HomeViewController : UITableViewDataSource, UITableViewDelegate {
     }
     
 }
-
-extension HomeViewController : HomeViewModelDelegateProtocol {
-    func didLoadData() {
-        print("done")
-        tableView.reloadData()
-        print(viewModel.trendingSections?.count ?? 0)
-    }
-    
-    func didStartLoading() {
-        print("loading...")
-
-    }
+//MARK: setup section
+extension HomeViewController  {
     func setUpSection() {
         guard let sections  = viewModel.trendingSections else { return }
         
@@ -140,4 +133,15 @@ extension HomeViewController : HomeViewModelDelegateProtocol {
         }
     }
     
+}
+// MARK: Bind data
+extension HomeViewController {
+    private func bindViewModel() {
+        viewModel.$trendingSections
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.tableView.reloadData()
+            }
+            .store(in: &cancellables)
+    }
 }
