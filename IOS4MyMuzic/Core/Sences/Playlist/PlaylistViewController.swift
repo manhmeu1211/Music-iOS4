@@ -9,7 +9,8 @@ import UIKit
 
 class PlaylistViewController: UIViewController {
 
-    private let titleLabel: UILabel = {
+    // MARK: - Properties
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Playlist"
         label.font = .boldSystemFont(ofSize: 36)
@@ -18,14 +19,14 @@ class PlaylistViewController: UIViewController {
         return label
     }()
 
-    private let addPlaylistImageView: UIImageView = {
+    private lazy var addPlaylistImageView: UIImageView = {
         let plusImageView = UIImageView()
         plusImageView.image = UIImage(resource: .icBtnPlus)
         plusImageView.translatesAutoresizingMaskIntoConstraints = false
         return plusImageView
     }()
 
-    private let addPlaylistLabel: UILabel = {
+    private lazy var addPlaylistLabel: UILabel = {
         let label = UILabel()
         label.text = "Add a new playlist"
         label.font = .boldSystemFont(ofSize: 18)
@@ -80,6 +81,18 @@ class PlaylistViewController: UIViewController {
         setupCollectionView()
     }
 
+    private func configureAddPlaylist() {
+        addPlaylistButton.addTarget(self, action: #selector(addPlaylist), for: .touchUpInside)
+    }
+    
+    // MARK: - Action
+    @objc private func addPlaylist() {
+        print("Click")
+    }
+}
+
+// MARK: - UI
+extension PlaylistViewController {
     private func setupUI() {
         view.addSubview(titleLabel)
         view.addSubview(addPlaylistStackView)
@@ -118,15 +131,6 @@ class PlaylistViewController: UIViewController {
             playlistCollectionView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
             playlistCollectionView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0),
         ])
-    }
-    
-    private func configureAddPlaylist() {
-        addPlaylistButton.addTarget(self, action: #selector(addPlaylist), for: .touchUpInside)
-    }
-    
-    // MARK: - Action
-    @objc private func addPlaylist() {
-        print("Click")
     }
 }
 

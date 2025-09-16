@@ -10,7 +10,7 @@ import UIKit
 class PlaylistCell: UICollectionViewCell {
     static let reuseIdentifier = "PlaylistCell"
 
-    private let coverImageView: UIImageView = {
+    private lazy var coverImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
@@ -19,7 +19,7 @@ class PlaylistCell: UICollectionViewCell {
         return imageView
     }()
 
-    private let playlistNameLabel: UILabel = {
+    private lazy var playlistNameLabel: UILabel = {
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 18)
         label.textColor = .white
@@ -27,7 +27,7 @@ class PlaylistCell: UICollectionViewCell {
         return label
     }()
 
-    private let songCountLabel: UILabel = {
+    private lazy var songCountLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16)
         label.textColor = .lightGray
@@ -35,7 +35,7 @@ class PlaylistCell: UICollectionViewCell {
         return label
     }()
 
-    private let moreActionButton: UIButton = {
+    private lazy var moreActionButton: UIButton = {
         let button = UIButton(type: .system)
         let image = UIImage(resource: .icMoreAction)
         button.setImage(image, for: .normal)
